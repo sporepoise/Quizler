@@ -1,0 +1,24 @@
+{
+  "name": "js-assessment-quizler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require @babel/register",
+    "start": "nodemon --exec babel-node src/index.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/node": "^7.6.1",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/register": "^7.6.0",
+    "jsverify": "^0.8.3",
+    "mocha": "^5.0.0",
+    "nodemon": "^1.19.2",
+    "underscore": "^1.8.3"
+  },
+  "dependencies": {
+    "inquirer": "^5.0.0",
+    "vorpal": "^1.12.0"
+  }
+}
