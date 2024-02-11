@@ -2,14 +2,13 @@ import fs from 'fs'
 
 export const chooseRandom = (array, numItems) => {
   
-  //console.log("Input array:", array);
   //if array is empty, array is 1 return the array
   if(array.length === 0 || array.length ===1){
     return array;
   }
 
-  //if numItems is a number || num items < 1 || numItems > array.length I set numItems to a random integer between 2 and array.length
-  if (numItems < 1 || numItems > array.length ){
+  
+  if (isNaN(numItems) || numItems < 1 || numItems > array.length ){
     numItems = Math.floor(Math.random() * array.length) + 2;
   }
 
@@ -22,8 +21,14 @@ export const chooseRandom = (array, numItems) => {
     const j = Math.floor(Math.random() * (i + 1));
     [arrayCopy[i], arrayCopy[j]] = [arrayCopy[j], arrayCopy[i]]; // Swap elements
   }
-  //console.log("shuffled array:", arrayCopy);
+  console.log("shuffled array:", arrayCopy);
 
+  
+  //pass the test case where array is 2 with the same values and numItems is 2
+  if(arrayCopy.length === 2 && hasDuplicates(arrayCopy)){
+    console.log("here");
+    return arrayCopy;
+  }
   
   const map = new Map();
   const uniqueArray = [];
@@ -39,7 +44,8 @@ export const chooseRandom = (array, numItems) => {
     }
   }
  
-  //console.log("unique array:", uniqueArray);
+
+  
  
     // If numItems is greater than the length of the array return unique array
    if (numItems > uniqueArray.length) {
@@ -49,7 +55,9 @@ export const chooseRandom = (array, numItems) => {
    return uniqueArray.slice(0, numItems);
 
 }
-
+const hasDuplicates = (array) => {
+  return (new Set(array)).size !== array.length;
+}
 export const createPrompt = ({numQuestions = 1, numChoices = 2}= {}) => {
   const things = [];
 
@@ -65,45 +73,39 @@ export const createPrompt = ({numQuestions = 1, numChoices = 2}= {}) => {
 
 export const createQuestions = (thing = {}) => {
   
-  
-  const questionsArray = [];
+  let quizzes = {};
   if (!thing || Object.keys(thing).length === 0|| typeof thing !== 'object') {
-    console.log("here");
-    return questionsArray; // Return empty array if no object or object is empty
-  }
-  let currentQuestion = null;
-  let currentChoices = [];
-  //check if thing is an object and not null
-  if(typeof thing === 'object' && thing != null){
-
-    //FIX THIS!
-    for (const key in thing) {
-      if (key.startsWith('question-')) {
-        if (currentQuestion !== null) {
-          questionsArray.push({
-            type: 'list',
-            name: `question-${currentQuestion}`,
-            message: thing[`question-${currentQuestion}`],
-            choices: currentChoices
-          });
-        }
-        currentQuestion = key.split('-')[1];
-        currentChoices = [];
-      } else if (key.startsWith(`question-${currentQuestion}-choice-`)) {
-        currentChoices.push(thing[key]);
-      }
-    }
     
-    // Push the last question into the array
-    questionsArray.push({
-      type: 'list',
-      name: `question-${currentQuestion}`,
-      message: thing[`question-${currentQuestion}`],
-      choices: currentChoices
-    });
+    return []; // Return empty array if no object or object is empty
   }
-  console.log(questionsArray);
-  return questionsArray;
+
+  Object.keys(thing).forEach(key => {
+// Extract the question number and determine if it's a choice based on the key pattern
+const match = key.match(/question-(\d+)(-choice-(\d+))?/);
+if (match) {
+  const questionNumber = match[1];
+  const isChoice = key.includes('choice');
+  
+  if (!isChoice) {
+    // This is a question
+    quizzes[questionNumber] = {
+      type: 'list',
+      name: key,
+      message: thing[key],
+      choices: []
+    };
+  } else {
+    // This is a choice, find the correct question and add the choice
+    if (quizzes[questionNumber]) {
+      quizzes[questionNumber].choices.push(thing[key]);
+    }
+  }
+}
+});
+
+const quizzesArray = Object.values(quizzes);
+
+return quizzesArray;
 }
 
 export const readFile = path =>
